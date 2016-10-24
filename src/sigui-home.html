@@ -1,0 +1,118 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="sigui-home">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      #container {
+        height: 800px;
+        margin: auto;
+      }
+    </style>
+
+
+    <style is="custom-style">
+      .flex-vertical {
+        @apply(--layout-vertical);
+      }
+
+      .flex-horizontal {
+        @apply(--layout-horizontal);
+      }
+    </style>
+
+    <div class="card">
+      <h1>Home</h1>
+      <form is="iron-form">
+        <div class="flex-vertical">
+          <div class="flex-horizontal">
+            <paper-input label="Upload file" type="file" required></paper-input>
+            <paper-button raised on-click="_upload">Upload</paper-button>
+          </div>
+          <div>
+            Please choose a JSON or GEXF file.
+          </div>
+        </div>
+      </form>
+      <div>
+        <div id="container"></div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'sigui-home',
+
+      properties: {
+        file: Object
+      },
+
+      _upload: function () {
+        var container = this.$$('#container');
+
+        container.innerHTML = '';
+        if (this.$$('paper-input').inputElement.files.length < 1) {
+          this.fire('notify', {error: 'Please choose a file!'});
+        } else {
+          this.file = this.$$('paper-input').inputElement.files[0];
+          if (!(this.file.type === 'application/json' && this.file.name.endsWith('.json')) && !(this.file.type === '' && this.file.name.endsWith('.gexf'))) {
+            this.fire('notify', {error: 'Please choose a valid file!'});
+            this.file = null;
+          } else {
+            var reader = new FileReader();
+            var fileContentFormat = this.file.name.substr(this.file.name.lastIndexOf('.') + 1);
+
+            // When file loaded, set the fileContent to the file result
+            reader.onload = function (event) {
+              var content;
+
+              if (fileContentFormat === 'json') {
+                content = JSON.parse(event.target.result);
+                var s = new sigma({
+                  graph: content,
+                  container: container,
+                  settings: {
+                    defaultNodeColor: '#ec5148'
+                  }
+                });
+              } else if (fileContentFormat === 'gexf') {
+                var p = new DOMParser();
+                content = p.parseFromString(event.target.result, 'application/xml');
+                sigma.parsers.gexf(content, {
+                  container: container,
+                  settings: {
+                    defaultNodeColor: '#ec5148'
+                  }
+                });
+              }
+            };
+
+            // Read file as text
+            reader.readAsText(this.file);
+          }
+        }
+      }
+    });
+  </script>
+</dom-module>
