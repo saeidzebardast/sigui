@@ -1,6 +1,6 @@
 {
-  "name": "Sigma.js GUI",
-  "short_name": "Sigma.js GUI",
+  "name": "Sigui",
+  "short_name": "Sigui",
   "start_url": "/?homescreen=1",
   "display": "standalone",
   "theme_color": "#3f51b5",

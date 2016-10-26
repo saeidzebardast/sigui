@@ -1,7 +1,7 @@
 {
-  "name": "polymer-starter-kit",
+  "name": "Sigui",
   "authors": [
-    "The Polymer Authors"
+    "Saeid Zebardast"
   ],
   "private": true,
   "dependencies": {
