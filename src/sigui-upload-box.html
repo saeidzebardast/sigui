@@ -1,0 +1,68 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<dom-module id="sigui-upload-box">
+  <template>
+    <style is="custom-style">
+      .flex-vertical {
+        @apply(--layout-vertical);
+      }
+
+      .flex-horizontal {
+        @apply(--layout-horizontal);
+      }
+    </style>
+    <div class="flex-vertical">
+      <div class="flex-horizontal">
+        <paper-input label="Upload file" type="file" required></paper-input>
+        <paper-button raised on-click="_upload">Upload</paper-button>
+      </div>
+      <div>
+        Please choose a JSON or GEXF file.
+      </div>
+    </div>
+  </template>
+  <script>
+    (function () {
+      'use strict';
+
+      Polymer({
+        is: 'sigui-upload-box',
+
+        properties: {
+          foo: {
+            type: String,
+            value: 'sigui-upload-box',
+            notify: true
+          }
+        },
+
+        _upload: function () {
+          if (this.$$('paper-input').inputElement.files.length < 1) {
+            this.fire('notify', {error: 'Please choose a file!'});
+          } else {
+            this.file = this.$$('paper-input').inputElement.files[0];
+            if (!(this.file.type === 'application/json' && this.file.name.endsWith('.json')) && !(this.file.type === '' && this.file.name.endsWith('.gexf'))) {
+              this.fire('notify', {error: 'Please choose a valid file!'});
+              this.file = null;
+            } else {
+              var reader = new FileReader();
+              var fileContentFormat = this.file.name.substring(this.file.name.lastIndexOf('.') + 1);
+              var that = this;
+              // When file loaded, set the fileContent to the file result
+              reader.onload = function (event) {
+                that.fire('upload-success', {fileContentFormat: fileContentFormat, content: event.target.result});
+              };
+
+              // Read file as text
+              reader.readAsText(this.file);
+            }
+          }
+        }
+
+      });
+    })();
+  </script>
+</dom-module>
